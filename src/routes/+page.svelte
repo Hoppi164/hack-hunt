@@ -1,17 +1,11 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
-
-
 <script>
-    import { allServers, initServers } from '/src/logic/servers';
-    import { onMount } from 'svelte';
+	import { onMount } from 'svelte';
+	import NetworkGraph from '/src/components/networkGraph.svelte';
 
-    onMount(async () => {
-        initServers();
-        console.log(allServers);
-    });
-    
+	onMount(async () => {});
 </script>
+
+<NetworkGraph />
 
 <style>
 	@import '/src/style/theme.css';

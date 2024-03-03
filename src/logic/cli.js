@@ -29,8 +29,8 @@ function help() {
     `;
 }
 
-import { allServers, initServers, getNewIP } from './servers';
-import user from './user';
+import { user, allServers } from '/src/stores/gameStore';
+
 /**
  * Connect to a server
  * @param {string} ip - The IP address of the server to connect to
