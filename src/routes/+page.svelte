@@ -12,3 +12,7 @@
     });
     
 </script>
+
+<style>
+	@import '/src/style/theme.css';
+</style>

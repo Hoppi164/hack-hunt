@@ -1,0 +1,91 @@
+/* Apply color variables to themeClass when themeClass contains a theme class */
+/* All themes should have primary, secondary, highlight, accent, background, border, text */
+
+/* Default Theme */
+:root {
+	--primary: #2196f3;
+	--secondary: #bbdefb;
+	--highlight: #03a9f4;
+	--accent: #ffc107;
+	--background: #212121;
+	--background-inverse: #e1e1e1;
+	--border: #2196f3;
+	--text: #ffffff;
+}
+
+.green-theme {
+	--primary: #4caf50;
+	--secondary: #c8e6c9;
+	--highlight: #8bc34a;
+	--accent: #ffc107;
+	--background: #212121;
+	--background-inverse: #e1e1e1;
+	--border: #4caf50;
+	--text: #ffffff;
+}
+
+.blue-theme {
+	--primary: #2196f3;
+	--secondary: #bbdefb;
+	--highlight: #03a9f4;
+	--accent: #ffc107;
+	--background: #212121;
+	--background-inverse: #e1e1e1;
+	--border: #2196f3;
+	--text: #ffffff;
+}
+
+.red-theme {
+	--primary: #f44336;
+	--secondary: #ffcdd2;
+	--highlight: #e57373;
+	--accent: #ffc107;
+	--background: #212121;
+	--background-inverse: #e1e1e1;
+	--border: #f44336;
+	--text: #ffffff;
+}
+
+.dark-theme {
+	--primary: #212121;
+	--secondary: #424242;
+	--highlight: #616161;
+	--accent: #ffc107;
+	--background: #212121;
+	--background-inverse: #e1e1e1;
+	--border: #ffffff;
+	--text: #ffffff;
+}
+
+.light-theme {
+	--primary: #ffffff;
+	--secondary: #f5f5f5;
+	--highlight: #fafafa;
+	--accent: #ffc107;
+	--background: #e1e1e1;
+	--background-inverse: #212121;
+	--border: #ffc107;
+	--text: #212121;
+}
+
+.purple-theme {
+	--primary: #9c27b0;
+	--secondary: #e1bee7;
+	--highlight: #ba68c8;
+	--accent: #ffc107;
+	--background: #212121;
+	--background-inverse: #e1e1e1;
+	--border: #9c27b0;
+	--text: #ffffff;
+}
+
+.orange-theme {
+	--primary: #ff9800;
+	--secondary: #ffe0b2;
+	--highlight: #ffb74d;
+	--accent: #ffc107;
+	--background: #212121;
+	--background-inverse: #e1e1e1;
+	--border: #ff9800;
+	--text: #ffffff;
+}
