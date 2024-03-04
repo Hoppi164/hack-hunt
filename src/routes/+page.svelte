@@ -1,12 +1,38 @@
 <script>
 	import { onMount } from 'svelte';
 	import NetworkGraph from '/src/components/networkGraph.svelte';
+	import Terminal from '/src/components/terminal.svelte';
 
 	onMount(async () => {});
 </script>
 
-<NetworkGraph />
+<div class="screen">
+	<div class="column h-100 w-100">
+		<Terminal />
+		<NetworkGraph />
+	</div>
+	
+</div>
+
 
 <style>
 	@import '/src/style/theme.css';
+	.screen{
+		width: 100%;
+		height: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+
+		background-color: var(--background);
+		color: var(--foreground);
+		
+	}
+
+	.column{
+		justify-content: space-between;
+	}
+	
+	
+	
 </style>

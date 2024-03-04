@@ -19,7 +19,6 @@
 <style>
 	#networkGraph {
 		width: 100%;
-		height: 10%;
 		min-width: 100px;
 		min-height: 100px;
 		background-color: var(--background);
