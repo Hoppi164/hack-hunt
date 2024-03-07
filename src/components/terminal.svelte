@@ -12,14 +12,21 @@
 
 	function moveCursor(event) {
 		// Check if the key pressed was not an arrow key
-		const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+		const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Backspace'];
 		if (arrowKeys.includes(event.key) === false) {
 			return;
 		}
 
-		// Prevent left/right arrow keys from moving the cursor up or down
-		if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+		// Prevent left/right/backspace keys from moving the cursor up or down
+		if (event.key === 'ArrowLeft' || event.key === 'ArrowRight' || event.key === 'Backspace') {
 			const cursorPosition = textareaRef.selectionStart;
+
+			// prevent the backspace key from moving the cursor to the left if the character before is a newline
+			if (event.key === 'Backspace') {
+				if (terminalInput[cursorPosition - 1] === '\n') {
+					event.preventDefault();
+				}
+			}
 
 			// prevent the cursor from moving to the left if the character before is a newline
 			if (event.key === 'ArrowLeft') {
