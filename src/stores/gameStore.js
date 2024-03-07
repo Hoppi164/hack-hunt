@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { initServers } from '/src/logic/servers';
+import { initServers } from '$lib/../logic/servers';
 
 export const allServers = writable(initServers());
 

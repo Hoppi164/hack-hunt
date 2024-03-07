@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
-	import NetworkGraph from '/src/components/networkGraph.svelte';
-	import Terminal from '/src/components/terminal.svelte';
+	import NetworkGraph from '$lib/../components/networkGraph.svelte';
+	import Terminal from '$lib/../components/terminal.svelte';
 
 	onMount(async () => {});
 </script>
@@ -11,13 +11,11 @@
 		<Terminal />
 		<NetworkGraph />
 	</div>
-	
 </div>
-
 
 <style>
 	@import '/src/style/theme.css';
-	.screen{
+	.screen {
 		width: 100%;
 		height: 100%;
 		display: flex;
@@ -26,13 +24,9 @@
 
 		background-color: var(--background);
 		color: var(--foreground);
-		
 	}
 
-	.column{
+	.column {
 		justify-content: space-between;
 	}
-	
-	
-	
 </style>

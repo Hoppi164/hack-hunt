@@ -1,6 +1,6 @@
 <script>
-	import { allServers } from '/src/stores/gameStore';
-	import NetworkNode from '/src/components/networkNode.svelte';
+	import { allServers } from '$lib/../stores/gameStore';
+	import NetworkNode from '$lib/../components/networkNode.svelte';
 
 	$: allServersList = Object.values($allServers);
 </script>
