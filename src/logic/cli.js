@@ -55,7 +55,9 @@ const commands = [
 	'pwd',
 	'whoami',
 	'getAllServers',
-	'getRandomServerIP'
+	'getRandomServerIP',
+	'getRandomServer',
+	'getUserData'
 ];
 
 function runCommand(command, args) {
@@ -63,17 +65,30 @@ function runCommand(command, args) {
 		return `Command not found: ${command}`;
 	}
 
-	return eval(`${command}("${args.join(', ')}")`);
+	// Trim any quotes from the arguments
+	args = args.map((arg) => arg.replace(/"/g, ''));
+
+	return eval(`${command}("${args.join('", "')}")`);
 }
 
 function getAllServers() {
 	return get(allServers);
+}
+function getRandomServer() {
+	const allServerIps = Object.keys(get(allServers));
+	const numServers = allServerIps.length;
+	const randomIndex = randomNumber(0, numServers - 1);
+	return get(allServers)[allServerIps[randomIndex]];
 }
 function getRandomServerIP() {
 	const allServerIps = Object.keys(get(allServers));
 	const numServers = allServerIps.length;
 	const randomIndex = randomNumber(0, numServers - 1);
 	return allServerIps[randomIndex];
+}
+
+function getUserData() {
+	return get(user);
 }
 
 /**
@@ -84,39 +99,112 @@ function getRandomServerIP() {
 
 function connect(ip) {
 	if (!ip) return 'Please enter an IP address to connect to. Usage: connect <ip>';
+	const userData1 = get(user);
+	console.log({ userData1 });
 
-	const doesServerExist = get(allServers)[ip];
-	if (!doesServerExist) {
+	const server = get(allServers)[ip];
+	if (!server) {
 		return `Server not found: ${ip}`;
 	}
 
 	user.update((userData) => {
-		userData.currentServer = allServers[ip];
+		userData.currentServer = server;
 		userData.currentServerPath = '/';
 		userData.connectedToServer = true;
+		userData.knownServers[ip] = userData.knownServers[ip] || { ip, name: server.name, users: {} };
 		return userData;
 	});
 
 	const connectedServer = get(allServers)[ip];
+	const userData = get(user);
+	console.log({ userData });
 
 	return `Connected to ${connectedServer.name} at ${ip}`;
 }
 
 /**
  * Disconnect from the current server
- * @returns {void}
+ * @returns {string} - String indicating whether the disconnection was successful
  */
 function disconnect() {
-	user.currentServer = null;
-	user.currentServerPath = '/';
-	user.connectedToServer = false;
+	user.update((userData) => {
+		userData.currentServer = null;
+		userData.currentServerPath = '/';
+		userData.connectedToServer = false;
+		return userData;
+	});
+
+	return 'Disconnected from server';
 }
 
 /**
  * Log in to the current server
  * @param {string} username - The username to log in with
  * @param {string} password - The password to log in with
- * @returns {boolean} - Whether the login was successful
+ * @returns {string} - String indicating whether the login was successful
  */
+function login(username, password) {
+	console.log({ username, password });
 
-export { commands, help, runCommand, connect, disconnect, getAllServers, getRandomServerIP };
+	if (!username || !password) {
+		return 'Please enter a username and password to log in. Usage: login <username> <password>';
+	}
+
+	// Check if the user is connected to a server
+	const userData = get(user);
+	if (!userData.connectedToServer || !userData.currentServer) {
+		console.log({ userData });
+
+		return 'You must be connected to a server to log in';
+	}
+
+	// Check if the user is already logged in
+	if (userData.loggedIn) {
+		return 'You are already logged in';
+	}
+
+	// Check if the username and password are correct
+	const server = userData.currentServer;
+	const userAccount = server.users.find((user) => user.username === username);
+	const passwordCorrect = userAccount && userAccount.password === password;
+
+	if (passwordCorrect) {
+		user.update((userData) => {
+			userData.loggedIn = true;
+			userData.knownServers[server.ip].users[username] = { username, password };
+			return userData;
+		});
+		return `Logged in as ${username}`;
+	} else {
+		return 'Invalid username or password';
+	}
+}
+
+/**
+ * Log out of the current server
+ * @returns {string} - String indicating whether the logout was successful
+ */
+function logout() {
+	// Check if the user is connected to a server
+	const userData = get(user);
+	if (!userData.connectedToServer || !userData.currentServer) {
+		return 'You must be connected to a server to log out';
+	}
+
+	// Check if the user is already logged out
+	if (!userData.loggedIn) {
+		return 'You are already logged out';
+	}
+
+	user.update((userData) => {
+		userData.loggedIn = false;
+		userData.currentServer = null;
+		userData.currentServerPath = '/';
+		userData.connectedToServer = false;
+		return userData;
+	});
+
+	return 'Logged out';
+}
+
+export { commands, help, runCommand, getAllServers };

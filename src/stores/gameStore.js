@@ -9,11 +9,8 @@ export const user = writable({
 	currentServerPath: '/',
 	connectedToServer: false,
 	loggedIn: false,
-	username: null,
-	password: null,
 	homeComputer: null,
 	connectedToHomeComputer: false,
 	homeComputerPath: '/',
-	knownCompromisedCredentials: {},
-	knownServers: []
+	knownServers: {}
 });
