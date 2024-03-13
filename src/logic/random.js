@@ -187,7 +187,13 @@ function randomFileSystem(username = 'admin', password, ip, businessName, person
 				bin: {
 					type: 'directory',
 					path: '/bin',
-					children: {}
+					children: {
+						'test.sh': {
+							type: 'file',
+							path: '/bin/test.sh',
+							children: 'echo "Hello World"'
+						},
+					}
 				},
 				home: {
 					type: 'directory',
