@@ -2,7 +2,7 @@
 	// Import everything from the cli.js file
 	import * as cli from '../logic/cli.js';
 
-	let terminalInput = '';
+	export let terminalInput = '';
 	$: terminalLines = terminalInput.split('\n');
 	let selectedLine = -1; // This is the number of lines from the history
 	let history = [];
@@ -54,6 +54,8 @@
 			selectedLine = Math.min(history.length - 1, selectedLine + 1);
 		} else if (event.key === 'ArrowDown') {
 			selectedLine = Math.max(-1, selectedLine - 1);
+			// Move cursor to the end of the textarea
+			textareaRef.selectionStart = terminalInput.length;
 		}
 
 		// Set the value of the textAreas last line to the selected command from the history
@@ -96,6 +98,11 @@
 		// Check if the command is valid
 		if (!cli.commands.includes(command)) {
 			console.log('Command not found; type "help" for a list of commands.');
+			return;
+		}
+
+		if (command === 'clear') {
+			terminalInput = '';
 			return;
 		}
 
