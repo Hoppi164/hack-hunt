@@ -177,41 +177,48 @@ function randomFileSystem(username = 'admin', password, ip, businessName, person
 	const fileSystem = {
 		'/': {
 			type: 'directory',
-			contents: {
+			path: '/',
+			children: {
 				logs: {
 					type: 'directory',
-					contents: {}
+					path: '/logs',
+					children: {}
 				},
 				bin: {
 					type: 'directory',
-					contents: {}
+					path: '/bin',
+					children: {}
 				},
 				home: {
 					type: 'directory',
-					contents: {}
+					path: '/home',
+					children: {}
 				}
 			}
 		}
 	};
 
 	// Add a directory for the username or business name or person name
-	const homeDirectory = fileSystem['/'].contents.home.contents;
+	const homeDirectory = fileSystem['/'].children.home.children;
 	if (username && randomNumber(1, 100) <= 25) {
 		homeDirectory[username] = {
 			type: 'directory',
-			contents: {}
+			path: `/home/${username}`,
+			children: {}
 		};
 	}
 	if (businessName && randomNumber(1, 100) <= 25) {
 		homeDirectory[businessName] = {
 			type: 'directory',
-			contents: {}
+			path: `/home/${businessName}`,
+			children: {}
 		};
 	}
 	if (personName && randomNumber(1, 100) <= 25) {
 		homeDirectory[personName] = {
 			type: 'directory',
-			contents: {}
+			path: `/home/${personName}`,
+			children: {}
 		};
 	}
 
@@ -220,16 +227,20 @@ function randomFileSystem(username = 'admin', password, ip, businessName, person
 	for (const dir of allHomeDirectories) {
 		const currentDir = homeDirectory[dir];
 		for (let i = 0; i < randomNumber(0, 5); i++) {
-			currentDir.contents[randomFileName()] = {
+			const rubbishDataFileName = randomFileName();
+			currentDir.children[rubbishDataFileName] = {
 				type: 'file',
-				contents: randomString(randomNumber(100, 500))
+				path: `${currentDir.path}/${rubbishDataFileName}`,
+				children: randomString(randomNumber(100, 500))
 			};
 
 			// Sometimes add a file with the username and password
 			if (randomNumber(1, 100) <= 25) {
-				currentDir.contents[randomFileName()] = {
+				const credentialFileName = randomFileName();
+				currentDir.children[credentialFileName] = {
 					type: 'file',
-					contents: `username: ${username} password: ${password}`
+					path: `${currentDir.path}/${credentialFileName}`,
+					children: `username: ${username} password: ${password}`
 				};
 			}
 		}
@@ -242,6 +253,31 @@ function randomDeviceType() {
 	const allDeviceTypes = ['server', 'desktop', 'laptop', 'phone', 'tablet'];
 	return allDeviceTypes[randomNumber(0, allDeviceTypes.length - 1)];
 }
+
+/**
+ * Return a random choice from an array
+ * @param {Array} choices - An array of options to choose from
+ * @returns {any} - A random choice from the array
+ */
+function randomChoice(choices = ["a", "b", "c"]){
+    return choices[Math.floor(Math.random() * choices.length)];
+}
+
+/**
+ * Generate a random date between start and end
+ * @param {Date} start - The start date
+ * @param {Date} end - The end date
+ * @returns {Date} - A random date between `start` and `end`
+ */
+function randomDate(start = new Date(1970, 0, 1), end = new Date()){
+	// If start and end are strings attempt to parse them as dates
+	if (typeof start === "string") start = new Date(start);
+	if (typeof end === "string") end = new Date(end);
+	
+	return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+}
+  
+
 
 export {
 	randomString,

@@ -20,7 +20,7 @@ function help() {
     scan-network - Scan the network for connected servers
     cd <directory> - Change directory
     ls - List files in the current directory
-    cat <filename> - Print the contents of a file
+    cat <filename> - Print the children of a file
     clear - Clear the terminal screen
     rm <filename> - Remove a file
     mv <filename1> <filename2> - Move a file
@@ -39,21 +39,23 @@ const commands = [
 	'disconnect',
 	'login',
 	'logout',
-	'scan',
-	'hack',
-	'scan-network',
 	'cd',
 	'ls',
-	'cat',
+	'pwd',
 	'clear',
+
+	'cat',
 	'rm',
 	'mv',
 	'cp',
 	'touch',
 	'mkdir',
 	'rmdir',
-	'pwd',
 	'whoami',
+	'scan',
+	'hack',
+	'scan-network',
+
 	'getAllServers',
 	'getRandomServerIP',
 	'getRandomServer',
@@ -110,7 +112,6 @@ function connect(ip) {
 	user.update((userData) => {
 		userData.currentServer = server;
 		userData.currentServerPath = '/';
-		userData.connectedToServer = true;
 		userData.knownServers[ip] = userData.knownServers[ip] || { ip, name: server.name, users: {} };
 		return userData;
 	});
@@ -128,9 +129,8 @@ function connect(ip) {
  */
 function disconnect() {
 	user.update((userData) => {
-		userData.currentServer = null;
-		userData.currentServerPath = '/';
-		userData.connectedToServer = false;
+		userData.currentServer = userData.homeServer;
+		userData.currentServerPath = userData.homeComputerPath;
 		return userData;
 	});
 
@@ -152,14 +152,8 @@ function login(username, password) {
 
 	// Check if the user is connected to a server
 	const userData = get(user);
-	if (!userData.connectedToServer || !userData.currentServer) {
-		console.log({ userData });
-
-		return 'You must be connected to a server to log in';
-	}
-
 	// Check if the user is already logged in
-	if (userData.loggedIn) {
+	if (userData.loggedIn[userData.currentServer.ip]) {
 		return 'You are already logged in';
 	}
 
@@ -187,8 +181,8 @@ function login(username, password) {
 function logout() {
 	// Check if the user is connected to a server
 	const userData = get(user);
-	if (!userData.connectedToServer || !userData.currentServer) {
-		return 'You must be connected to a server to log out';
+	if (userData.currentServer === userData.homeServer) {
+		return 'You cannot log out of your home server';
 	}
 
 	// Check if the user is already logged out
@@ -198,13 +192,113 @@ function logout() {
 
 	user.update((userData) => {
 		userData.loggedIn = false;
-		userData.currentServer = null;
-		userData.currentServerPath = '/';
-		userData.connectedToServer = false;
+		userData.currentServer = userData.homeServer;
+		userData.currentServerPath = userData.homeComputerPath;
 		return userData;
 	});
 
 	return 'Logged out';
+}
+
+/**
+ * Prints the current working directory
+ * @returns {string} - The current working directory
+ */
+function pwd() {
+	const userData = get(user);
+	const fileSystem = userData.currentServer.fileSystem;
+
+	return userData.currentServerPath;
+}
+
+/**
+ * Change directory
+ * - change the currentServerPath
+ * - Should allow for relative paths, and absolute paths
+ * - Should allow for navigating to direct child directory, or a full path to a deep directory
+ * - Should not allow for navigating to a file
+ * - Should not allow for navigating to a directory that doesn't exist
+ * @param {Array} args - The directory to change to (pass as a string - this function will split it into an array and join it back together)
+ * @throws {string} - Error message if the directory does not exist
+ * @returns {string} - String indicating whether the directory change was successful
+ */
+function cd(...args) {
+	const path = args.join(' ');
+	const userData = get(user);
+	const fileSystem = userData.currentServer.fileSystem;
+	const currentDir = userData.currentServerDirectory;
+
+	console.log({ path });
+
+	if (!userData.loggedIn[userData.currentServer.ip]) {
+		return 'You must be logged in to change directories';
+	}
+
+	let dirPath = path;
+
+	// if Absolute path:
+	if (path.startsWith('/')) {
+		dirPath = dirPath;
+	} else {
+		dirPath = userData.currentServerPath + '/' + path;
+	}
+	dirPath = dirPath.slice(1);
+
+	// add a / to the end of the path if there isn't one
+	if (!dirPath.endsWith('/')) {
+		dirPath = dirPath + '/';
+	}
+
+	// Accommodate for no path
+	if (path === '') {
+		dirPath = '/';
+	}
+
+	// Convert to absolute path of object, and then use eval to change the current path
+
+	// Use regex to change '/<dirname>' to .children[<dirname>] except for the first /
+	let newPath = `fileSystem["/"]` + dirPath.replaceAll(/(.*?)[\/]|([^\/]*)/g, '.children["$1"]');
+	newPath = newPath.replaceAll('.children[""]', ''); // Remove any empty children
+	console.log({ newPath });
+
+	// Accommodate for the '..' command
+	// Get rid of the two most recent .chilren in the path
+	if (path === '..') {
+		newPath = newPath.split('.children').slice(0, -2).join('.children');
+		console.log({ newPath });
+	}
+
+	const targetDirectory = eval(newPath);
+
+	if (!targetDirectory) {
+		return `Directory not found: ${path}`;
+	}
+
+	// Change the current path
+	user.update((userData) => {
+		userData.currentServerDirectory = targetDirectory;
+		userData.currentServerPath = targetDirectory.path;
+		return userData;
+	});
+	return targetDirectory.path;
+}
+
+/**
+ * List files in the current directory
+ * @returns {string} - A string containing the files in the current directory
+ */
+
+function ls() {
+	const userData = get(user);
+	const currentDirectory = userData.currentServerDirectory;
+	console.log({ currentDirectory });
+
+	if (!userData.loggedIn[userData.currentServer.ip]) {
+		return 'You must be logged in to list files';
+	}
+
+	const content = Object.keys(currentDirectory.children);
+	return content.length ? content.join('  ') : 'No files or directories.';
 }
 
 export { commands, help, runCommand, getAllServers };
