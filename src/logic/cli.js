@@ -43,11 +43,11 @@ const commands = [
 	'ls',
 	'pwd',
 	'clear',
-
 	'cat',
 	'rm',
 	'mv',
 	'cp',
+
 	'touch',
 	'mkdir',
 	'rmdir',
@@ -101,8 +101,6 @@ function getUserData() {
 
 function connect(ip) {
 	if (!ip) return 'Please enter an IP address to connect to. Usage: connect <ip>';
-	const userData1 = get(user);
-	console.log({ userData1 });
 
 	const server = get(allServers)[ip];
 	if (!server) {
@@ -117,8 +115,6 @@ function connect(ip) {
 	});
 
 	const connectedServer = get(allServers)[ip];
-	const userData = get(user);
-	console.log({ userData });
 
 	return `Connected to ${connectedServer.name} at ${ip}`;
 }
@@ -144,8 +140,6 @@ function disconnect() {
  * @returns {string} - String indicating whether the login was successful
  */
 function login(username, password) {
-	console.log({ username, password });
-
 	if (!username || !password) {
 		return 'Please enter a username and password to log in. Usage: login <username> <password>';
 	}
@@ -225,14 +219,33 @@ function pwd() {
 function cd(...args) {
 	const path = args.join(' ');
 	const userData = get(user);
-	const fileSystem = userData.currentServer.fileSystem;
-	const currentDir = userData.currentServerDirectory;
-
-	console.log({ path });
 
 	if (!userData.loggedIn[userData.currentServer.ip]) {
 		return 'You must be logged in to change directories';
 	}
+
+	const targetDirectory = getFileFromPath(path);
+
+	if (!targetDirectory) {
+		return `Directory not found: ${path}`;
+	}
+
+	if (targetDirectory.type !== 'directory') {
+		return `${path} is not a directory`;
+	}
+
+	// Change the current path
+	user.update((userData) => {
+		userData.currentServerDirectory = targetDirectory;
+		userData.currentServerPath = targetDirectory.path;
+		return userData;
+	});
+	return targetDirectory.path;
+}
+
+function getFileFromPath(path) {
+	const userData = get(user);
+	const fileSystem = userData.currentServer.fileSystem;
 
 	let dirPath = path;
 
@@ -259,28 +272,15 @@ function cd(...args) {
 	// Use regex to change '/<dirname>' to .children[<dirname>] except for the first /
 	let newPath = `fileSystem["/"]` + dirPath.replaceAll(/(.*?)[\/]|([^\/]*)/g, '.children["$1"]');
 	newPath = newPath.replaceAll('.children[""]', ''); // Remove any empty children
-	console.log({ newPath });
 
 	// Accommodate for the '..' command
-	// Get rid of the two most recent .chilren in the path
+	// Get rid of the two most recent .children in the path
 	if (path === '..') {
 		newPath = newPath.split('.children').slice(0, -2).join('.children');
-		console.log({ newPath });
 	}
 
 	const targetDirectory = eval(newPath);
-
-	if (!targetDirectory) {
-		return `Directory not found: ${path}`;
-	}
-
-	// Change the current path
-	user.update((userData) => {
-		userData.currentServerDirectory = targetDirectory;
-		userData.currentServerPath = targetDirectory.path;
-		return userData;
-	});
-	return targetDirectory.path;
+	return targetDirectory;
 }
 
 /**
@@ -291,7 +291,6 @@ function cd(...args) {
 function ls() {
 	const userData = get(user);
 	const currentDirectory = userData.currentServerDirectory;
-	console.log({ currentDirectory });
 
 	if (!userData.loggedIn[userData.currentServer.ip]) {
 		return 'You must be logged in to list files';
@@ -299,6 +298,112 @@ function ls() {
 
 	const content = Object.keys(currentDirectory.children);
 	return content.length ? content.join('  ') : 'No files or directories.';
+}
+
+/**
+ * Read the contents of a file
+ * @param {string} path - The path of the file to read
+ * @returns {string} - The contents of the file
+ * @throws {string} - Error message if the file does not exist
+ * @throws {string} - Error message if the file is not a file
+ */
+function cat(path) {
+	const userData = get(user);
+	const targetDirectory = getFileFromPath(path);
+
+	if (!targetDirectory) {
+		return `File not found: ${path}`;
+	}
+
+	if (targetDirectory.type !== 'file') {
+		return `${path} is not a file`;
+	}
+
+	return targetDirectory.children;
+}
+
+/**
+ * Delete a file
+ * @param {string} path - The path of the file to delete
+ * @returns {string} - String indicating whether the file was deleted successfully
+ * @throws {string} - Error message if the file does not exist
+ * @throws {string} - Error message if the file is not a file
+ */
+function rm(path) {
+	const targetFile = getFileFromPath(path);
+	const parentDirPath = targetFile.path.split('/').slice(0, -1).join('/');
+	const parentDir = getFileFromPath(parentDirPath) || pwd();
+	const fileName = path.split('/').slice(-1)[0];
+
+	if (!targetFile) {
+		return `File not found: ${path}`;
+	}
+
+	if (targetFile.type !== 'file') {
+		return `${path} is not a file`;
+	}
+
+	delete parentDir.children[fileName];
+
+	return `Deleted ${path}`;
+}
+
+/**
+ * Copy a file
+ * Should allow the destination to be a directory or a file
+ * @param {string} source - The path of the file to copy
+ * @param {string} destination - The path to copy the file to
+ * @returns {string} - String indicating whether the file was copied successfully
+ * @throws {string} - Error message if the source file does not exist
+ * @throws {string} - Error message if the source file is not a file
+ * @throws {string} - Error message if the destination file already exists
+ */
+function cp(source, destination) {
+	const sourceFile = getFileFromPath(source);
+	const destinationFile = getFileFromPath(destination);
+	const fileName = destination.split('/').slice(-1)[0];
+
+	if (!sourceFile) {
+		return `File not found: ${source}`;
+	}
+
+	if (sourceFile.type !== 'file') {
+		return `${source} is not a file`;
+	}
+
+	if (destinationFile && destinationFile.type === 'file') {
+		return `File already exists at ${destination}`;
+	}
+
+	if (destinationFile && destinationFile.type === 'directory') {
+		destinationFile.children[fileName] = structuredClone(sourceFile);
+		destinationFile.children[fileName].path = destination + '/' + fileName;
+	}
+
+	if (!destinationFile) {
+		const parentDirPath = destination.split('/').slice(0, -1).join('/') || pwd();
+		const parentDir = getFileFromPath(parentDirPath);
+		parentDir.children[fileName] = structuredClone(sourceFile);
+		parentDir.children[fileName].path = destination;
+	}
+
+	return `Copied ${source} to ${destination}`;
+}
+
+/**
+ * Move a file
+ * Should allow the destination to be a directory or a file
+ * @param {string} source - The path of the file to move
+ * @param {string} destination - The path to move the file to
+ * @returns {string} - String indicating whether the file was moved successfully
+ * @throws {string} - Error message if the source file does not exist
+ * @throws {string} - Error message if the source file is not a file
+ * @throws {string} - Error message if the destination file already exists
+ */
+function mv(source, destination) {
+	cp(source, destination);
+	rm(source);
+	return `Moved ${source} to ${destination}`;
 }
 
 export { commands, help, runCommand, getAllServers };
