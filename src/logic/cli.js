@@ -50,8 +50,8 @@ const commands = [
 	'touch',
 	'mkdir',
 	'rmdir',
-
 	'whoami',
+
 	'scan',
 	'hack',
 	'scan-network',
@@ -124,6 +124,12 @@ function connect(ip) {
  * @returns {string} - String indicating whether the disconnection was successful
  */
 function disconnect() {
+	// Check if the user is connected to a server
+	const userData = get(user);
+	if (userData.currentServer === userData.homeServer) {
+		return 'You cannot disconnect from your home server';
+	}
+
 	user.update((userData) => {
 		userData.currentServer = userData.homeServer;
 		userData.currentServerPath = userData.homeComputerPath;
@@ -159,6 +165,7 @@ function login(username, password) {
 	if (passwordCorrect) {
 		user.update((userData) => {
 			userData.loggedIn = true;
+			userData.currentUser[server.ip] = username;
 			userData.knownServers[server.ip].users[username] = { username, password };
 			return userData;
 		});
@@ -186,6 +193,7 @@ function logout() {
 
 	user.update((userData) => {
 		userData.loggedIn = false;
+		userData.currentUser[userData.currentServer.ip] = '';
 		userData.currentServer = userData.homeServer;
 		userData.currentServerPath = userData.homeComputerPath;
 		return userData;
@@ -462,6 +470,16 @@ function rmdir(path) {
 	delete parentDir.children[dirName];
 
 	return `Removed directory ${path}`;
+}
+
+/**
+ * Return the current user
+ * @returns {string} - The current user
+ */
+function whoami() {
+	const userData = get(user);
+	const server = userData.currentServer;
+	return userData.currentUser?.[server.ip]?.username || 'Guest';
 }
 
 export { commands, help, runCommand, getAllServers };

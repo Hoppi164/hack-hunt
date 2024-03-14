@@ -9,6 +9,7 @@ export const user = writable({
 	currentServerDirectory: {},
 	currentServerPath: '/',
 	loggedIn: {},
+	currentUser: {},
 	homeServer: {},
 	homeComputerPath: '/',
 	knownServers: {}
@@ -28,6 +29,7 @@ export const initUser = () => {
 			users: homeServer.users
 		};
 		userData.loggedIn[homeServer.ip] = true;
+		userData.currentUser[homeServer.ip] = homeServer.users[0];
 		userData.currentServer = homeServer;
 		userData.currentServerPath = '/';
 		userData.currentServerDirectory = homeServer.fileSystem['/'];
