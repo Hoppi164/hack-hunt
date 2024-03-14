@@ -22,7 +22,8 @@ npm run dev
 
 ## Todo
 
-- [ ] Create Terminal
+- [x] Create a basic Network Map
+- [x] Create Terminal
 - [ ] Add an email system
 - [ ] Add hacking mechanics
 - [ ] Add websockets for multiplayer
