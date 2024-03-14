@@ -47,10 +47,10 @@ const commands = [
 	'rm',
 	'mv',
 	'cp',
-
 	'touch',
 	'mkdir',
 	'rmdir',
+
 	'whoami',
 	'scan',
 	'hack',
@@ -331,7 +331,7 @@ function cat(path) {
  */
 function rm(path) {
 	const targetFile = getFileFromPath(path);
-	const parentDirPath = targetFile.path.split('/').slice(0, -1).join('/');
+	const parentDirPath = targetFile.path.split('/').slice(0, -1).join('/') || pwd();
 	const parentDir = getFileFromPath(parentDirPath) || pwd();
 	const fileName = path.split('/').slice(-1)[0];
 
@@ -404,6 +404,64 @@ function mv(source, destination) {
 	cp(source, destination);
 	rm(source);
 	return `Moved ${source} to ${destination}`;
+}
+
+/**
+ * Create a new file
+ * @param {string} path - The path of the file to create
+ * @returns {string} - String indicating whether the file was created successfully
+ */
+function touch(path) {
+	const fileName = path.split('/').slice(-1)[0];
+	const parentDirPath = path.split('/').slice(0, -1).join('/') || pwd();
+	const parentDir = getFileFromPath(parentDirPath);
+	parentDir.children[fileName] = {
+		type: 'file',
+		path: path,
+		children: ''
+	};
+	return `Created file ${path}`;
+}
+
+/**
+ * Create a new directory
+ * @param {string} path - The path of the directory to create
+ * @returns {string} - String indicating whether the directory was created successfully
+ */
+function mkdir(path) {
+	const dirName = path.split('/').slice(-1)[0];
+	const parentDirPath = path.split('/').slice(0, -1).join('/') || pwd();
+	const parentDir = getFileFromPath(parentDirPath);
+	parentDir.children[dirName] = {
+		type: 'directory',
+		path: path,
+		children: {}
+	};
+	return `Created directory ${path}`;
+}
+
+/**
+ * Remove a directory
+ * @param {string} path - The path of the directory to remove
+ * @returns {string} - String indicating whether the directory was removed successfully
+ */
+function rmdir(path) {
+	const targetDirectory = getFileFromPath(path);
+	const parentDirPath = path.split('/').slice(0, -1).join('/') || pwd();
+	const parentDir = getFileFromPath(parentDirPath);
+	const dirName = path.split('/').slice(-1)[0];
+
+	if (!targetDirectory) {
+		return `Directory not found: ${path}`;
+	}
+
+	if (targetDirectory.type !== 'directory') {
+		return `${path} is not a directory`;
+	}
+
+	delete parentDir.children[dirName];
+
+	return `Removed directory ${path}`;
 }
 
 export { commands, help, runCommand, getAllServers };
