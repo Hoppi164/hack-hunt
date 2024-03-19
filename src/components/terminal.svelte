@@ -1,8 +1,8 @@
 <script>
 	// Import everything from the cli.js file
 	import * as cli from '../logic/cli.js';
-
-	export let terminalInput = '';
+	import { terminalContent } from '../stores/gameStore.js';
+	$: terminalInput = $terminalContent;
 	$: terminalLines = terminalInput.split('\n');
 	let selectedLine = -1; // This is the number of lines from the history
 	let history = [];
@@ -66,10 +66,10 @@
 		const previousLines = terminalInput.split('\n').slice(0, -1).join('\n');
 
 		if (selectedLine < 0 || selectedLine > history.length - 1) {
-			terminalInput = previousLines + '\n';
+			terminalContent.update((content) => previousLines);
 		} else {
 			// Set the last line of the textarea to the negative selected command from the history
-			terminalInput = previousLines + '\n' + history[selectedLine];
+			terminalContent.update((content) => previousLines + '\n' + history[selectedLine]);
 		}
 	}
 
@@ -102,16 +102,20 @@
 		}
 
 		if (command === 'clear') {
-			terminalInput = '';
+			terminalContent.update((content) => '');
 			return;
 		}
 
 		// Run the command
 		const response = cli.runCommand(command, args);
 		// Add the response to the terminal
-		terminalInput += '\n' + JSON.stringify(response);
+		terminalContent.update((content) => `${content}\n${JSON.stringify(response)}`);
 
 		return;
+	}
+
+	export function writeToTerminal(text) {
+		terminalInput += '\n' + JSON.stringify(text);
 	}
 </script>
 

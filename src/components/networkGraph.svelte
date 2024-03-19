@@ -11,7 +11,7 @@
 	<!-- Connect nodes with lines -->
 	{#each allServersList as server}
 		<div class="nodeContainer">
-			<NetworkNode />
+			<NetworkNode server={server} />
 		</div>
 	{/each}
 </div>
@@ -24,6 +24,7 @@
 		background-color: var(--background);
 		border: 2px solid var(--border);
 		color: var(--text);
+		overflow: hidden;
 	}
 
 	/* Make each node distribute like a node graph */

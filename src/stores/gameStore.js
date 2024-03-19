@@ -46,4 +46,6 @@ export const initUser = () => {
 	runCommand(`connect ${homeServer.ip}`);
 };
 
+export const terminalContent = writable('');
+
 initUser();
