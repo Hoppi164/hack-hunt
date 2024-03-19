@@ -61,6 +61,32 @@ const commands = [
 	'getRandomServer',
 	'getUserData'
 ];
+const commandMap = {
+	help: help,
+	connect: connect,
+	disconnect: disconnect,
+	login: login,
+	logout: logout,
+	cd: cd,
+	ls: ls,
+	pwd: pwd,
+	clear: () => '',
+	cat: cat,
+	rm: rm,
+	mv: mv,
+	cp: cp,
+	touch: touch,
+	mkdir: mkdir,
+	rmdir: rmdir,
+	whoami: whoami,
+	scan: () => 'Scanning...',
+	hack: () => 'Hacking...',
+	'scan-network': () => 'Scanning...',
+	getAllServers: getAllServers,
+	getRandomServerIP: getRandomServerIP,
+	getRandomServer: getRandomServer,
+	getUserData: getUserData
+};
 
 function runCommand(command, args) {
 	if (!commands.includes(command)) {
@@ -69,8 +95,11 @@ function runCommand(command, args) {
 
 	// Trim any quotes from the arguments
 	args = args.map((arg) => arg.replace(/"/g, ''));
+	const arg0 = args?.[0];
+	const args1 = args?.[1];
 
-	return eval(`${command}("${args.join('", "')}")`);
+	// Run the command
+	return commandMap[command](arg0, args1);
 }
 
 function getAllServers() {
@@ -275,7 +304,7 @@ function getFileFromPath(path) {
 		dirPath = '/';
 	}
 
-	// Convert to absolute path of object, and then use eval to change the current path
+	// Convert to absolute path of object, and then parse the path to change the current directory
 
 	// Use regex to change '/<dirname>' to .children[<dirname>] except for the first /
 	let newPath = `fileSystem["/"]` + dirPath.replaceAll(/(.*?)[\/]|([^\/]*)/g, '.children["$1"]');
@@ -287,7 +316,18 @@ function getFileFromPath(path) {
 		newPath = newPath.split('.children').slice(0, -2).join('.children');
 	}
 
-	const targetDirectory = eval(newPath);
+	// Parse the newPath to get the target directory
+	let targetDirectory = fileSystem['/'];
+	newPath = newPath.split('fileSystem["/"]')[1];
+	let pathArray = newPath.split('.children');
+	pathArray = pathArray.map((child) => {
+		return child.replaceAll('[', '').replaceAll(']', '').replaceAll('"', '').trim();
+	});
+
+	for (const child of pathArray) {
+		if (child === '') continue;
+		targetDirectory = targetDirectory.children[child];
+	}
 	return targetDirectory;
 }
 
