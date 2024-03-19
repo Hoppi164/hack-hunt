@@ -109,7 +109,19 @@ function getRandomServer() {
 	const allServerIps = Object.keys(get(allServers));
 	const numServers = allServerIps.length;
 	const randomIndex = randomNumber(0, numServers - 1);
-	return get(allServers)[allServerIps[randomIndex]];
+
+	const newServer = get(allServers)[allServerIps[randomIndex]];
+
+	user.update((userData) => {
+		userData.knownServers[newServer.ip] = userData.knownServers[newServer.ip] || {
+			ip: newServer.ip,
+			name: newServer.name,
+			users: {}
+		};
+		return userData;
+	});
+
+	return newServer;
 }
 function getRandomServerIP() {
 	const allServerIps = Object.keys(get(allServers));
@@ -139,6 +151,7 @@ function connect(ip) {
 	user.update((userData) => {
 		userData.currentServer = server;
 		userData.currentServerPath = '/';
+		userData.currentServerDirectory = server.fileSystem['/'];
 		userData.knownServers[ip] = userData.knownServers[ip] || { ip, name: server.name, users: {} };
 		return userData;
 	});
@@ -193,8 +206,8 @@ function login(username, password) {
 
 	if (passwordCorrect) {
 		user.update((userData) => {
-			userData.loggedIn = true;
-			userData.currentUser[server.ip] = username;
+			userData.loggedIn[server.ip] = true;
+			userData.currentUser[server.ip] = { username, password };
 			userData.knownServers[server.ip].users[username] = { username, password };
 			return userData;
 		});
@@ -216,15 +229,16 @@ function logout() {
 	}
 
 	// Check if the user is already logged out
-	if (!userData.loggedIn) {
+	if (!userData.loggedIn[userData.currentServer.ip]) {
 		return 'You are already logged out';
 	}
 
 	user.update((userData) => {
-		userData.loggedIn = false;
-		userData.currentUser[userData.currentServer.ip] = '';
+		userData.loggedIn[userData.currentServer.ip] = false;
+		delete userData.currentUser[userData.currentServer.ip];
 		userData.currentServer = userData.homeServer;
 		userData.currentServerPath = userData.homeComputerPath;
+		userData.currentServerDirectory = userData.homeServer.fileSystem['/'];
 		return userData;
 	});
 
