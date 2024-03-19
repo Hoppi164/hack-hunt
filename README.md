@@ -24,8 +24,9 @@ npm run dev
 
 - [x] Create a basic Network Map
 - [x] Create Terminal
-- [ ] Add an email system
-- [ ] Add hacking mechanics
 - [ ] Add websockets for multiplayer
+- [ ] Add hacking mechanics
+- [ ] Add an email / messaging system
+- [ ] Add a Tutorial
 - [ ] Add missions
 - [ ] Add a leaderboard
