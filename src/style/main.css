@@ -6,5 +6,5 @@ body {
 
 /* Make everything border-box */
 * {
-    box-sizing: border-box;
+	box-sizing: border-box;
 }

@@ -192,7 +192,7 @@ function randomFileSystem(username = 'admin', password, ip, businessName, person
 							type: 'file',
 							path: '/bin/test.sh',
 							children: 'echo "Hello World"'
-						},
+						}
 					}
 				},
 				home: {
@@ -265,8 +265,8 @@ function randomDeviceType() {
  * @param {Array} choices - An array of options to choose from
  * @returns {any} - A random choice from the array
  */
-function randomChoice(choices = ["a", "b", "c"]){
-    return choices[Math.floor(Math.random() * choices.length)];
+function randomChoice(choices = ['a', 'b', 'c']) {
+	return choices[Math.floor(Math.random() * choices.length)];
 }
 
 /**
@@ -275,15 +275,13 @@ function randomChoice(choices = ["a", "b", "c"]){
  * @param {Date} end - The end date
  * @returns {Date} - A random date between `start` and `end`
  */
-function randomDate(start = new Date(1970, 0, 1), end = new Date()){
+function randomDate(start = new Date(1970, 0, 1), end = new Date()) {
 	// If start and end are strings attempt to parse them as dates
-	if (typeof start === "string") start = new Date(start);
-	if (typeof end === "string") end = new Date(end);
-	
+	if (typeof start === 'string') start = new Date(start);
+	if (typeof end === 'string') end = new Date(end);
+
 	return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
-  
-
 
 export {
 	randomString,

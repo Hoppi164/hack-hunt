@@ -11,7 +11,7 @@
 	<!-- Connect nodes with lines -->
 	{#each allServersList as server}
 		<div class="nodeContainer">
-			<NetworkNode server={server} />
+			<NetworkNode {server} />
 		</div>
 	{/each}
 </div>

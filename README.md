@@ -14,11 +14,11 @@ npm run dev
 
 ## Built With
 
-* [Svelte](https://svelte.dev/) - The web framework used
+- [Svelte](https://svelte.dev/) - The web framework used
 
 ## Authors
 
-* [Andrew Hopkins](https://hoppi164.github.io)
+- [Andrew Hopkins](https://hoppi164.github.io)
 
 ## Todo
 
@@ -29,4 +29,3 @@ npm run dev
 - [ ] Add websockets for multiplayer
 - [ ] Add missions
 - [ ] Add a leaderboard
-

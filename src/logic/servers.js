@@ -77,9 +77,7 @@ function createRandomServer() {
 		status: 'off',
 		fileSystem
 	};
-
 }
-
 
 /**
  * Initialize the servers with a given number of servers
@@ -90,7 +88,7 @@ function createRandomServer() {
 function initServers(numServers = 100) {
 	for (let i = 0; i < numServers; i++) {
 		const newServer = createRandomServer();
-		allServers[newServer.ip] = newServer; 
+		allServers[newServer.ip] = newServer;
 	}
 	return allServers;
 }
