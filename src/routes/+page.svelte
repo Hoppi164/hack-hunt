@@ -2,12 +2,14 @@
 	import { onMount } from 'svelte';
 	import NetworkGraph from '$lib/../components/networkGraph.svelte';
 	import Terminal from '$lib/../components/terminal.svelte';
+	import MultiplayerManager from '../components/multiplayerManager.svelte';
 
 	onMount(async () => {});
 </script>
 
 <div class="screen">
 	<div class="column h-100 w-100">
+		<MultiplayerManager />
 		<Terminal />
 		<NetworkGraph />
 	</div>

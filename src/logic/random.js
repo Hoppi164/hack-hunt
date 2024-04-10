@@ -7,7 +7,7 @@ import { businessFirstName, businessLastName, personFirstName, personLastName } 
  * @returns {string} - A random string of length `length` with characters from `chars`
  */
 function randomString(
-	length,
+	length=10,
 	chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 ) {
 	let result = '';
