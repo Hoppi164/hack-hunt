@@ -31,11 +31,13 @@
 		var pc1 = new RTCPeerConnection(cfg, con);
 		let dc1 = null;
 
-		dc1 = pc1.createDataChannel('lobby', { reliable: true });
+		const newPlayerIndex = allDataChannels.length;
+		dc1 = pc1.createDataChannel(`dataChannel${newPlayerIndex}`, { reliable: true });
 		dc1.onopen = function (e) {};
 		dc1.onmessage = function (e) {
 			var data = JSON.parse(e.data);
 			const message = data.message;
+			sendMessage(message);
 			alert(`Got message: \n\n${message}`);
 		};
 		pc1.createOffer(
@@ -115,8 +117,14 @@
 	}
 
 	// Send a message to the lobby
-	function sendMessage(message) {
-		const msg = prompt('Please enter the message you would like to send to the lobby');
+	function sendMessage(message = '') {
+		let msg = message;
+		console.log(msg);
+		console.log(msg === '');
+		if (!msg || msg === '' || typeof msg !== 'string') {
+			msg = prompt('Please enter the message you would like to send to the lobby') || '';
+		}
+		console.log(msg);
 
 		allDataChannels.forEach((dc) => {
 			dc.send(JSON.stringify({ message: msg }));
@@ -129,7 +137,12 @@
 		const answer = atob(base64Answer);
 		const remoteAnswer = JSON.parse(answer);
 		var answerDesc = new RTCSessionDescription(remoteAnswer);
-		allConnections[0].setRemoteDescription(answerDesc);
+
+		allConnections.forEach((connection) => {
+			if (!['closed', 'stable'].includes(connection.signalingState)) {
+				connection.setRemoteDescription(answerDesc);
+			}
+		});
 	}
 
 	// Onload, check if the user is joining a lobby
