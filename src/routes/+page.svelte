@@ -10,8 +10,10 @@
 <div class="screen">
 	<div class="column h-100 w-100">
 		<MultiplayerManager />
-		<Terminal />
-		<NetworkGraph />
+		<div class="column space-between h-100 w-100">
+			<Terminal />
+			<NetworkGraph />
+		</div>
 	</div>
 </div>
 
@@ -29,6 +31,13 @@
 	}
 
 	.column {
+		display: flex;
+		flex-direction: column;
+		justify-content: stretch;
+	}
+
+	.space-between {
+		display: flex;
 		justify-content: space-between;
 	}
 </style>
